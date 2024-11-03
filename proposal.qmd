@@ -1,0 +1,64 @@
+---
+title: Fill in Your Project Title
+author: Fill in Your Name
+---
+
+Update the title and author in the front matter at the top of the document and fill in text for each of the three sections. Add scripts to the folder named `R` and input data to a folder named `data`. Any images or other files used for this Quarto document can be added to a folder named `files`. Leave headings in place but remove all instructions and any unused code blocks.
+
+You should answer each question with a brief but considered response. If it helps to have a word count, try to answer all three questions in something between 700 and 1000 words but longer is OK. Refer back to [the final project instructions on the course website](https://bldgspatialdata.github.io/website/final-project.html) for more details.
+
+```{r}
+# Load packages required for the analysis
+```
+
+```{r}
+#| echo: false
+# Optionally source functions from `functions.R` script
+source(here::here("R", "functions.R"))
+# Add more calls to source as needed
+```
+
+## Goals
+
+Briefly explain your goals for the project. Consider using a list format to organize your thoughts.
+
+Your goals could include answering a research question, making the case for a public policy change, or building an interface to help people better understand an issue in their community.
+
+**Ask yourself:** Who might benefit from your proposed project? How can your project can avoid causing people harm?
+
+## Data
+
+Briefly identify and describe one or more data source you plan to use for this project. Make sure to include a link to any existing documentation. 
+
+**Ask yourself:** What is the “setting” for the data? Whose local knowledge does it represent? What communities participate in collecting or maintaining the data?
+
+Make sure your description also includes:
+
+- how the data and goals are related (e.g. you have a question that can be answered using the data),
+- what license or permissions the data is available under (include a link)
+- what is the format of the data
+- any documented data quality issues
+
+```{r}
+# Include code showing how to read in the data
+```
+
+```{r}
+# Include additional code necessary to check the data for completeness, consistency with documentation, and any other relevant issues
+```
+
+## Planned approach
+
+Briefly describe your planned approach to using the identified data to support your goals.
+
+Your approach could include mapping, exploratory analysis, documentation, visualization, or a combination of multiple approaches.
+
+You don’t need to reinvent the wheel. You can adapt an existing approach (reproducing an existing using new data or geography) or propose a few options you hope to try and compare.
+
+**Ask yourself:** Is your proposed approach feasible in the time you have available this semester? What challenges do you anticipate in using this data?
+
+Consider including relevant examples of how the data has been used by other researchers or practitioners. Consider using a list format or sub-headings to organize steps and stages in your planned process.
+
+```{r}
+# Optionally include code showing one or more preliminary steps in your process
+```

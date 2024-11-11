@@ -1,7 +1,9 @@
 ---
-title: Fill in Your Project Title
-author: Fill in Your Name
+title: Assessments, Zoning, and Segregation in Baltimore
+author: Joshua Spokes
 ---
+
+Change
 
 Update the title and author in the front matter at the top of the document and fill in text for each of the three sections. Add scripts to the folder named `R` and input data to a folder named `data`. Any images or other files used for this Quarto document can be added to a folder named `files`. Leave headings in place but remove all instructions and any unused code blocks.
 

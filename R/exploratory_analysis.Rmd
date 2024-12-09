@@ -1,0 +1,212 @@
+```{r vacants}
+library(readr)
+library(tidyverse)
+library(sf)
+library(janitor)
+library(lubridate)
+library(tidyr)
+library(purrr)
+library(tmap)
+
+vacants <- read.csv("/Users/jspokes/Documents/R_Projects/Final_Project_Presentation/Data/VBNs_All_112624.csv")
+baltimore <- st_read("/Users/jspokes/Documents/R_Projects/Final_Project_Presentation/Data/baltimore_real_prop_boundaries.gpkg")
+MD_Real_Property_Assessments <- read.csv("/Users/jspokes/Documents/R_Projects/Final_Project_Presentation/Data/MD_Real_Property_Assessments.csv")
+
+MD_Real_Property_Assessments |>
+  filter(`Jurisdiction.Code..MDP.Field..JURSCODE.` == "BACI") |>
+  select(county_key = `RECORD.KEY..County.Code..SDAT.Field..1.`,
+         acct_id = `Account.ID..MDP.Field..ACCTID.`,
+         block = `Block..MDP.Field..BLOCK..SDAT.Field..40.`,
+         lot = `Lot..MDP.Field..LOT..SDAT.Field..41.`,
+         sale_1_transfer_no = `SALES.SEGMENT.1..Transfer.Number..MDP.Field..TRANSNO1..SDAT.Field..79.`,
+         sale_1_grantor = `SALES.SEGMENT.1..Grantor.Name..MDP.Field..GRNTNAM1..SDAT.Field..80.`,
+         sale_1_type = `SALES.SEGMENT.1..How.Conveyed.Ind...MDP.Field..CONVEY1..SDAT.Field..87.`,
+         sale_1_date = `SALES.SEGMENT.1..Transfer.Date..YYYY.MM.DD...MDP.Field..TRADATE..SDAT.Field..89.`,
+         sale_1_price = `SALES.SEGMENT.1..Consideration..MDP.Field..CONSIDR1..SDAT.Field..90.`,
+         sale_1_mkt_land_value = `SALES.SEGMENT.1..Mkt.Land.Value..SDAT.Field..95.`,
+         sale_1_mkt_improvement_value = `SALES.SEGMENT.1..Mkt.Improvement.Value..SDAT.Field..96.`,
+         sale_2_transfer_no = `SALES.SEGMENT.2..Transfer.Number..SDAT.Field..99.`,
+         sale_2_grantor = `SALES.SEGMENT.2..Grantor.Name..SDAT.Field..100.`,
+         sale_2_type = `SALES.SEGMENT.2..How.Conveyed.Ind...SDAT.Field..107.`,
+         sale_2_date = `SALES.SEGMENT.2..Transfer.Date..YYYY.MM.DD...SDAT.Field..109.`,
+         sale_2_price = `SALES.SEGMENT.2..Consideration..SDAT.Field..110.`,
+         sale_2_mkt_land_value = `SALES.SEGMENT.2..Mkt.Land.Value..SDAT.Field..115.`,
+         sale_2_mkt_improvement_value = `SALES.SEGMENT.2..Mkt.Improvement.Value..SDAT.Field..116.`,
+         sale_3_transfer_no = `SALES.SEGMENT.3..Grantor.Name..SDAT.Field..120.`,
+         sale_3_grantor = `SALES.SEGMENT.2..Grantor.Name..SDAT.Field..100.`,
+         sale_3_type = `SALES.SEGMENT.3..How.Conveyed.Ind...SDAT.Field..127.`,
+         sale_3_date = `SALES.SEGMENT.3..Transfer.Date..YYYY.MM.DD...SDAT.Field..129.`,
+         sale_3_price = `SALES.SEGMENT.3..Consideration..SDAT.Field..130.`,
+         sale_3_mkt_land_value = `SALES.SEGMENT.3..Mkt.Land.Value..SDAT.Field..135.`,
+         sale_3_mkt_improvement_value = `SALES.SEGMENT.3..Mkt.Improvement.Value..SDAT.Field..136.`) |>
+  mutate(acct_id_full = paste0(county_key, acct_id),
+         BLOCKLOT = paste0(block, lot)) -> sales
+
+mutate(vacants,
+       DateNotice = as.POSIXct(DateNotice, format = "%m/%d/%Y %H:%M"),
+       DateAbate = as.POSIXct(DateAbate, format = "%m/%d/%Y %H:%M"),
+       DateCancel = as.POSIXct(DateCancel, format = "%m/%d/%Y %H:%M"),
+       BLOCKLOT = gsub(" ", "", BLOCKLOT),
+       date_terminate = coalesce(DateAbate, DateCancel)) -> dates
+```
+
+```{r sale-manipulation}
+sales |>
+  mutate(across(starts_with("sale_"), as.character)) |>
+  pivot_longer(cols = starts_with("sale_"),
+               names_to = c("sale", ".value"),
+               names_pattern = "sale_(\\d+)_(.*)",
+               values_drop_na = TRUE
+               ) -> all_sales
+
+filter(all_sales,
+       !(date == "0000.00.00")
+       ) |>
+  mutate(property = gsub(" ", "", BLOCKLOT),
+         date = as.POSIXct(date, format = "%Y.%m.%d")) -> sales_valid_date
+
+sales_valid_date |>
+  left_join(dates, by = join_by(property == BLOCKLOT)) |>
+  mutate(
+    vacant_at_sale = if_else(
+      (date >= DateNotice) & (is.na(date_terminate) | date <= date_terminate),
+      TRUE,
+      FALSE
+    )
+  ) |>
+  group_by(BLOCKLOT, sale) |>
+  summarise(across(everything(), first),
+            vacant_at_sale = any(vacant_at_sale, na.rm = TRUE)
+            ) -> vacant_sale
+```
+
+```{r assessments}
+MD_Real_Property_Assessments |>
+  select(county_key = `RECORD.KEY..County.Code..SDAT.Field..1.`,
+         acct_id = `Account.ID..MDP.Field..ACCTID.`,
+         block = `Block..MDP.Field..BLOCK..SDAT.Field..40.`,
+         lot = `Lot..MDP.Field..LOT..SDAT.Field..41.`,
+         starts_with(c("BASE.CYCLE.DATA",
+                       "PRIOR.ASSESSMENT.YEAR",
+                       "CURRENT.CYCLE.DATA",
+                       "CURRENT.ASSESSMENT.YEAR",
+                       "PRIOR.ASSESSMENT.YEAR.3")
+                     )) |>
+  mutate(acct_id_full = paste0(county_key, acct_id),
+         BLOCKLOT = paste0(trimws(block), trimws(lot))) -> assessments
+
+assessments |>
+  mutate(assessment_year = floor(`CURRENT.CYCLE.DATA..Date.Assessed..YYYY.MM...MDP.Field..LASTASSD..SDAT.Field..169.`),
+         base_years = map(assessment_year, ~ seq(.x - 3, .x - 1)),
+         current_years = map(assessment_year, ~ seq(.x, .x + 2))
+         ) |>
+  rowwise() |>
+  mutate(
+    years = list(c(base_years, current_years)),
+    land_values = list(c(rep(`BASE.CYCLE.DATA..Land.Value..SDAT.Field..154.`, length(base_years)), 
+                         rep(`CURRENT.CYCLE.DATA..Land.Value..MDP.Field.Names..NFMLNDVL..CURLNDVL..and.SALLNDVL..SDAT.Field..164.`, length(current_years)))),
+    improvement_values = list(c(rep(`BASE.CYCLE.DATA..Improvements.Value..SDAT.Field..155.`, length(base_years)), 
+                                rep(`CURRENT.CYCLE.DATA..Improvements.Value..MDP.Field.Names..NFMIMPVL..CURIMPVL..and.SALIMPVL..SDAT.Field..165.`, length(current_years)))),
+  ) |>
+  unnest(c(years, land_values, improvement_values)) |>
+  select(county_key,
+         acct_id_full,
+         BLOCKLOT,
+         Year = years,
+         Land_Value = land_values,
+         Improvement_Value = improvement_values) |>
+  mutate(Total_Assessment = Land_Value + Improvement_Value) -> long_assessment
+
+vacant_sale |>
+  select(property,
+         transfer_no,
+         acct_id,
+         acct_id_full,
+         date,
+         type,
+         price,
+         block,
+         vacant_at_sale) |>
+  mutate(Year = year(date),
+         acct_id_full = paste0("0", acct_id_full),
+         price = as.numeric(price),
+         block = trimws(block)) |>
+  filter(Year > 2019,
+         price > 0) |>
+  left_join(long_assessment, by = c("property" = "BLOCKLOT", "Year" = "Year")
+  ) |>
+  select(-acct_id_full.y) |>
+  rename(acct_id_full = acct_id_full.x) -> sale_with_value
+```
+
+```{r land-use}
+read.csv("/Users/jspokes/Documents/R_Projects/Final_Project_Presentation/Data/MD_CAMA_Core.csv") -> cama_core
+
+read.csv("/Users/jspokes/Documents/R_Projects/Final_Project_Presentation/Data/MD_CAMA_Building_Characteristics.csv") -> cama_bldg
+
+colnames(cama_bldg)
+cama_bldg |>
+  filter(JURSCODE == "BACI") |>
+  select(ACCTID,
+         BL_DSCTYPE,
+         BL_DSCSTYL,
+         BL_BLDGRAD,
+         BL_DSCCLSS) |>
+  mutate(ACCTID = gsub(" ", "", ACCTID)) -> cama_bldg_simple
+
+cama_core |>
+  filter(JURSCODE == "BACI") |>
+  select(ACCTID,
+         CM_DSCIUSE) |>
+  mutate(ACCTID = gsub(" ", "", ACCTID)) %>%
+  left_join(sale_with_value, ., by = join_by(acct_id_full == ACCTID)) |>
+  left_join(cama_bldg_simple, by = join_by(acct_id_full == ACCTID)
+            ) -> sale_with_land_desc
+```
+
+
+```{r sale types}
+filter(sale_with_land_desc,
+       type == "Private arms-length transfer, multiple parcel (3)") -> multiparcel
+
+baltimore |>
+  mutate(property = gsub(" ", "", BLOCKLOT)) -> baltimore
+
+filter(sale_with_land_desc,
+       type == "Private arms-length transfer, Improved (1)") |>
+  mutate(price_ratio = Total_Assessment/price) %>%
+  left_join(baltimore, by = join_by(property)) -> price_ratio
+
+price_ratio |>
+group_by(vacant_at_sale) |>
+  summarise(mean_price_ratio = mean(price_ratio, na.rm = TRUE)) 
+
+price_ratio |>
+  mutate(NEIGHBOR = trimws(NEIGHBOR)) |>
+  group_by(NEIGHBOR) |>
+  summarise(mean_price_ratio = mean(price_ratio, na.rm = TRUE),
+            n = n()) -> assessment_ratios
+
+baltimore |>
+  st_make_valid() |>
+  mutate(BLOCK = trimws(BLOCK)) |>
+  group_by(BLOCK) |>
+  summarise(mean_taxbase = mean(TAXBASE)) -> block_map
+
+left_join(block_map, assessment_ratios, by = join_by(BLOCK == block)) |>
+  filter(!is.na(mean_price_ratio))-> block_map_ratios
+
+st_read("/Users/jspokes/Documents/R_Projects/Final_Project_Presentation/Data/Neighborhood_Statistical_Area_(NSA)_Boundaries/Neighborhood_Statistical_Area_(NSA)_Boundaries.shp") -> baltimore_neighborhoods
+
+baltimore_neighborhoods |>
+  mutate(NEIGHBOR = trimws(toupper(Name))) |>
+ inner_join(assessment_ratios, by = join_by(NEIGHBOR)) -> neighborhood_look
+tmap_mode("view")
+tm_shape(neighborhood_look) +
+  tm_polygons(col = "mean_price_ratio",
+              style = "fixed",
+              breaks = c(0, 0.5, 0.75, 1, 1.25, 2))
+```
+
+
+

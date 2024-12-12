@@ -13,6 +13,7 @@ baltimore |>
          BLOCKLOT,
          VACIND,
          NO_IMPRV,
+         NEIGHBOR,
          OWNER_1) -> baltimore_land_use
 
 # pulling all property in from baltimore city

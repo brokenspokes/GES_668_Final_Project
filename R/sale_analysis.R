@@ -36,10 +36,12 @@ left_join(sales, property_land_use, by = join_by(property == BLOCKLOT)) |>
     vacant_at_sale                           ~ "vacant",
     str_detect(BL_DSCTYPE, "AUTO|WAREHOUSE") ~ "unperforming",
     .default = "regular"),
-    price_ratio = price / Total_Assessment) |>
+    price_ratio = Total_Assessment / price) |>
   group_by(NEIGHBOR, identifier) |>
   summarise(med_price_ratio = median(price_ratio),
             mean_price_ratio = mean(price_ratio),
+            med_price = median(price),
+            mean_price = mean(price),
             n = n(),
             .groups = "keep") |>
   pivot_wider(id_cols = "NEIGHBOR",
@@ -47,6 +49,8 @@ left_join(sales, property_land_use, by = join_by(property == BLOCKLOT)) |>
               names_glue = "{identifier}_{.value}",
               values_from = c("med_price_ratio",
                               "mean_price_ratio",
+                              "med_price",
+                              "mean_price",
                               "n")) %>%
   left_join(neighborhoods, ., by = join_by(Name == NEIGHBOR)) |>
   mutate(pct_blk = Blk_AfAm / Population,
@@ -61,3 +65,4 @@ left_join(sales, property_land_use, by = join_by(property == BLOCKLOT)) |>
                        "regular"))) -> neighborhood_stats
 
 saveRDS(neighborhood_stats, "neighborhood_stats")
+st_write(neighborhood_stats, "neighborhood_stats.gpkg", append = FALSE)

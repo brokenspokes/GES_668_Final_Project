@@ -134,6 +134,24 @@ vacant_sale |>
   select(-acct_id_full.y) |>
   rename(acct_id_full = acct_id_full.x) -> sale_with_value
 
-saveRDS(sale_with_value, "sales_of_interest.rds")
+
+sale_with_value |>
+  group_by(date, price, type, block) |>
+  summarise(property = first(property),
+            transfer_no = first(transfer_no),
+            acct_id_full = first(acct_id_full),
+            date = first(date),
+            type = first(type),
+            price = first(price),
+            block = first(block),
+            vacant_at_sale = first(vacant_at_sale),
+            Year = first(Year),
+            Land_Value = sum(Land_Value),
+            Improvement_Value = sum(Improvement_Value),
+            Total_Assessment = sum(Total_Assessment),
+            .groups = "drop"
+            ) -> unique_sales
+
+saveRDS(unique_sales, "sales_of_interest.rds")
 
 ## we are only interested in sales where we have a sale price and an assessment value

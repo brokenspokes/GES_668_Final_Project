@@ -1,64 +1,63 @@
 library(tidyverse)
 library(tmap)
+library(sf)
+library(janitor)
 
 readRDS("sales_of_interest.rds") |>
   as.data.frame() -> sales
 
 readRDS("baltimore_land_use.rds") |>
   as.data.frame() |>
-  select(- geom) -> property_land_use
+  select(-geom) -> property_land_use
 
 st_read("Data/Neighborhood_Statistical_Area_(NSA)_Boundaries/Neighborhood_Statistical_Area_(NSA)_Boundaries.shp") |>
   mutate(Name = toupper(Name)) -> neighborhoods
 
 
 left_join(sales, property_land_use, by = join_by(property == BLOCKLOT)) |>
+  group_by(property, transfer_no) |>
+  summarise(date = first(date),
+            price = first(price),
+            block = first(block.x),
+            property = first(property),
+            acct_id_full = first(acct_id_full.x),
+            vacant_at_sale = first(vacant_at_sale),
+            Land_Value = first(Land_Value),
+            Improvement_Value = first(Improvement_Value),
+            Total_Assessment = first(Total_Assessment),
+            NEIGHBOR = first(NEIGHBOR),
+            BL_DSCTYPE = first(BL_DSCTYPE),
+            BL_DSCSTYL = first(BL_DSCSTYL),
+            CM_DSCIUSE = first(CM_DSCIUSE),
+            NO_IMPRV = first(NO_IMPRV),
+            .groups = "keep") |>
   mutate(identifier = case_when(
     (NO_IMPRV == "Y" & is.na(BL_DSCTYPE))    ~ "unimproved",
     vacant_at_sale                           ~ "vacant",
     str_detect(BL_DSCTYPE, "AUTO|WAREHOUSE") ~ "unperforming",
     .default = "regular"),
-    price_ratio = price / Total_Assessment) -> sale_with_land
-
-sale_with_land |>
+    price_ratio = price / Total_Assessment) |>
   group_by(NEIGHBOR, identifier) |>
-  summarise(med_price_ratio = median(price_ratio), .groups = "keep") |>
+  summarise(med_price_ratio = median(price_ratio),
+            mean_price_ratio = mean(price_ratio),
+            n = n(),
+            .groups = "keep") |>
   pivot_wider(id_cols = "NEIGHBOR",
               names_from = "identifier",
-              values_from = "med_price_ratio") -> summary
+              names_glue = "{identifier}_{.value}",
+              values_from = c("med_price_ratio",
+                              "mean_price_ratio",
+                              "n")) %>%
+  left_join(neighborhoods, ., by = join_by(Name == NEIGHBOR)) |>
+  mutate(pct_blk = Blk_AfAm / Population,
+         pct_wht = White / Population) |>
+  select(Name,
+         Population,
+         pct_blk,
+         pct_wht,
+         starts_with(c("vacant",
+                       "unimproved",
+                       "unperforming",
+                       "regular"))) -> neighborhood_stats
 
-
-filter(sale_with_land,
-       identifier %in% c("vacant")) |>
-  group_by(NEIGHBOR) |>
-  summarise(mean_price_ratio = mean(price_ratio),
-            median_price_ration = median(price_ratio)) %>%
-  left_join(neighborhoods, ., by = join_by(Name == NEIGHBOR)) -> neighborhood_vacant_sales
-
-tmap_mode("view")
-
-tm_shape(neighborhood_vacant_sales) +
-  tm_polygons(col = "mean_price_ratio",
-              id = "Name",
-              palette = "viridis",
-              breaks = c(0, 1, 2, 5, 10, 15, 20),
-              popup.vars = c("mean_price_ratio",
-                             "median_price_ration"))
-
-filter(sale_with_land,
-       identifier == "unperforming") |>
-  group_by(NEIGHBOR) |>
-  summarise(mean_price_ratio = mean(price_ratio),
-            median_price_ration = median(price_ratio)) %>%
-  left_join(neighborhoods, ., by = join_by(Name == NEIGHBOR)) -> neighborhood_underperforming_sales
-
-tmap_mode("view")
-
-tm_shape(neighborhood_underperforming_sales) +
-  tm_polygons(col = "mean_price_ratio",
-              id = "Name",
-              palette = "viridis",
-              breaks = c(0, 1, 2, 5, 10, 15, 20),
-              popup.vars = c("mean_price_ratio",
-                             "median_price_ration"))
-
+saveRDS(neighborhood_stats, "neighborhood_stats")

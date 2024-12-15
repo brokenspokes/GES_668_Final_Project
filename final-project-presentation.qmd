@@ -1,32 +1,18 @@
 ---
-title: "GES668: Your Project Title"
-author: "Your Name"
-format: revealjs
-date-modified: 2023-12-13
+title: "GES668: Property Assessments in Baltimore"
+author: "Joshua Spokes"
+format: 
+  revealjs:
+    slide-number: true
+    multiplex: true
+date-modified: 2024-12-14
 ---
 
-## Using this template
 
-:::{.callout-tip collapse=false appearance='default' icon=true}
-## How to use this template
+## The Data
 
-This template is based on the [the GES 668 Final Project instructions](https://bldgspatialdata.github.io/website/final-project.html). You should *replace* the questions or other instructions in this template with your own writing about the project. Link to your project README or other files in your repository to provide more detailed information where appropriate.
-:::
 
-## Working with Reveal.js
 
-:::{.callout-tip appearance='default'}
-## Remove this slide
-
-This slide and the next three slides should be removed. They are only provided as a reference for working with [Reveal.js presentation format](https://quarto.org/docs/presentations/revealjs/) in Quarto. Check [the full list of options for the Reveal.js presentation format](https://quarto.org/docs/reference/formats/presentations/revealjs.html) in Quarto for more detailed information.
-
-:::
-
-## Working with Reveal.js
-
-This slide includes a captioned image inserted with Markdown formatting.
-
-![Building Spatial Datasets Course logo](https://bldgspatialdata.github.io/website/images/logo.png){fig-align="right" fig-width="50%"}
 
 ## Working with Reveal.js
 
@@ -77,15 +63,71 @@ This is an example of a custom footer.
 
 ## Overview
 
--   Brief summary description of the project
+Are certain types of properties getting a free ride on their taxes?
+![Project Origin](2_block_city.png)
+
+::: {.notes}
+Back when I was first learning about data analysis, I started a project looking at assessment values in and around the Patterson Bowling Alley. I compared the property taxes being paid by the blocks in the image and found that the commercial property in the middle was paying significantly less for the same amount of land.
+:::
 
 ## Project goals
 
--   What were your initial goals for the project?
+1. Identify tranches of property suspected to follow this pattern (Vacant, Auto-Oriented, etc.)
 
--   How did they change or develop as you worked on your project?
+2. Match these patterns to recorded sales
+
+3. Aggregate sales data by block group
+
+::: {.notes}
+My initial goals for the project were to identify sales of property in various categories defined in the proposal, like vacant, unimproved, and auto-oriented. I then planned to compare the sale price to the assessed price for the year and aggregate the data into block groups in order to analyze the sales.
+
+:::
+
+## Changes in Scope
+
+- Analysis was limited to the last five years
+
+- Analysis limited by data quality
+
+- Aggregation switched from census tracts to neighborhoods
+
+::: {.notes}
+As I dug into my exploratory analysis, I immediately ran into the limitation that the assessments only include the most recent years. This greatly affected my ability to look at things longitudinally. It was also hard to pluck out sales of homes that were flipped, which resulted in price to assessment ratios that were incredibly high. Finally, I found that it was easier to aggregate sales into neighborhood groups for the purposes of analysis because this provides bigger samples and better opportunities for any kind of insight.
+:::
+
 
 ## Data sources
+
+- Maryland CAMA/Assessment data is all public domain
+
+- Baltimore DHCD data licensed under Creative Commons 3.0
+
+- Baltimore Vacants data available under DOI [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14497481.svg)](https://doi.org/10.5281/zenodo.14497481)
+
+::: {.notes}
+The data used for this project come from Maryland's planning cadastre service on IMAP, with additional supporting data coming from Baltimore's open data portal and a dataset of vacant building notices provided by the Baltimore Department of Housing and Community Development. The extracts used for this analysis are all available through Zenodo
+:::
+
+## Baltimore Real Property
+
+```{r real-prop}
+#| label: baltimore-real-prop
+#| include: false
+library(sf)
+library(tmap)
+st_read("Data/baltimore_real_prop_boundaries.gpkg") -> baltimore
+
+baltimore |>
+  st_make_valid() |>
+  tm_shape() +
+  tm_polygons()
+```
+
+:::{.notes}
+This dataset is available through the Baltimore Open Data portal, so it is easy to download 
+
+:::
+
 
 More than one slide per data source is likely required for this section and basic information on each major data source used in your project. Make sure to answer:
 
@@ -93,7 +135,12 @@ More than one slide per data source is likely required for this section and basi
 
 -   How, why, and where were they created?
 
+The data used for this project come from Maryland's planning cadastre service on IMAP, with additional supporting data coming from Baltimore's open data portal and a dataset of vacant building notices provided by the Baltimore Department of Housing and Community Development.
+
+
 ## Approach and methods for working with data
+
+My project involved a significant amount of exploratory analysis, looking to determine the best ways to approach the intended goal. As I delved deeper into the project, I found that the quantity of the data or the quality of the data and transformations I was completing makes the comparisons very difficult. The results were not what I was expecting
 
 Briefly recap related information from your initial project proposal describing your approach. Make sure to answer:
 
@@ -103,13 +150,21 @@ Briefly recap related information from your initial project proposal describing 
 
 -   What packages, templates, or other resources did you use in creating your final project?
 
+
+
 ## Challenges in working with data
 
 What challenges did you encounter in making use of these resources and this data?
 
-Challenges can be practical, e.g. "Difficulty identifying which key-value pairs needed to query OpenStreetMap data," or conceptual, e.g. "Unsure appropriate level of geographical analysis to support a robust analysis."
+There are different primary keys to use between Baltimore city data and maryland state data
+
+I frequently found myself backtracking to add attributes to various intermediate datasets
+
+
 
 ## Successes in working with data
+
+I think my analysis does a good job in taking a very big dataset and distilling it to a more useable format. I aimed to make the data more tidy so that it would be easier to create comparisons
 
 What do you think your project does well?
 

@@ -37,6 +37,11 @@ left_join(sales, property_land_use, by = join_by(property == BLOCKLOT)) |>
     str_detect(BL_DSCTYPE, "AUTO|WAREHOUSE") ~ "unperforming",
     .default = "regular"),
     price_ratio = Total_Assessment / price) |>
+  ungroup() -> all_sales
+
+saveRDS(all_sales, "all_sales.rds")
+
+all_sales |>
   group_by(NEIGHBOR, identifier) |>
   summarise(med_price_ratio = median(price_ratio),
             mean_price_ratio = mean(price_ratio),

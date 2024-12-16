@@ -1,6 +1,51 @@
-# Title of your project
+# Property Assesments and Sale in Baltimore
 
-A short 1-2 sentence description of your project should go here.
+An analysis of sales of real property over the last five years in Baltimore, compared
+with assessed prices. This project aims to determine whether there is a systematic
+issue with assessments in the state of maryland assigning low values to vacant homes
+and property.
+
+## Data Sources
+
+All of the data except for one table is publicly available with both an API endpoint
+and the ability to download through an open data portal. I will provide both for
+all of those where it is available in addition to a public repository link where
+the extracts used in these analyses are available.
+
+### Baltimore Real Property Information (CC 3.0)
+
+API Endpoint: https://geodata.baltimorecity.gov/egis/rest/services/CityView/Realproperty_OB/FeatureServer/0
+
+Open Data Portal: https://data.baltimorecity.gov/datasets/baltimore::real-property-information-2/about
+
+My extract: https://doi.org/10.5281/zenodo.14498393
+
+### Baltimore Vacant Building Notices (CC 3.0)
+
+This is not available through the Baltimore Open Data portal.
+
+Available extract: https://doi.org/10.5281/zenodo.14497481
+
+### Maryland Real Property Information (Public Domain)
+
+API Endpoint: https://geodata.md.gov/imap/rest/services/PlanningCadastre/MD_ParcelBoundaries/MapServer/0
+
+Open Data Portal: https://opendata.maryland.gov/Business-and-Economy/Maryland-Real-Property-Assessments_Hidden-Property/ed4q-f8tm/about_data
+
+My extract: https://doi.org/10.5281/zenodo.14498401
+
+## Analysis Scripts
+
+## Acknowledgements and related projects
+
+## Who am I and how to get in touch
+
+My name is Joshua Spokes, I am a GIS Analyst with the City of Baltimore's Department
+of Public Works and an enthusiast property tax nerd. This is an extension of my project
+looking at property values in southeast Baltimore (https://github.com/brokenspokes/Southeast_Patterson)
+and exploring how property that is underutilized frequently gets a pass on their
+property tax bill. I will continue to build more analyses like this in the coming
+years as we work towards fairer assessments and taxation in our city and state.
 
 The README should continue with an longer description (using sub-headings to break up text as needed).
 

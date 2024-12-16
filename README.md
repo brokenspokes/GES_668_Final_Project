@@ -35,9 +35,31 @@ This is not available through the Baltimore Open Data portal.
 
 [My extract](https://doi.org/10.5281/zenodo.14498401)
 
+### Maryland CAMA Data
+
+[API Endpoint](https://geodata.md.gov/imap/rest/services/PlanningCadastre/MD_ComputerAssistedMassAppraisal/MapServer)
+
+[My extract](https://doi.org/10.5281/zenodo.14498436)
+
+### Baltimore Neighborhoods
+
+[Open Data Portal](https://data.baltimorecity.gov/datasets/baltimore::neighborhood-statistical-area-nsa-boundaries/about)
+
 ## Analysis Scripts
 
+### Property Identification
+
 ## Acknowledgements and related projects
+
+This project was inspired by similar work being taken on elsewhere that investigates
+the myriad of ways local governments, inadvertently or not, punish those with less
+wealth, less income, or just a smaller business. My interest in these topics is thanks
+to [Strong Towns by Charles Marohn](https://www.strongtowns.org/) and his work bringing
+attention to government's weakened ability to do the basics. Further, companies like
+Urban3 and their [Just Accounting Project](https://www.justaccounting.org/) have shown how this type of assessment bias
+can be systematic. Last, [Dr. Christopher Berry's project](https://s3.us-east-2.amazonaws.com/propertytaxdata.uchicago.edu/nationwide_reports/web/Baltimore%20city_Maryland.html#5_who_is_over-assessed) on this type of assessment
+bias in Baltimore showed how we need to pursue better policy solutions at home. 
+
 
 ## Who am I and how to get in touch
 

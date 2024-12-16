@@ -65,21 +65,3 @@ left_join(baltimore_cama_bldg,
 
 saveRDS(baltimore_cama_all, "baltimore_land_use.rds")
 
-# adding additional land use details
-
-
-# we will define unimproved properties as any property that is marked as
-# improved by the city and does not have a defined building style in the state data
-
-baltimore_cama_all |>
-  filter(NO_IMPRV == "Y",
-         is.na(BL_DSCTYPE)) -> unimproved
-
-saveRDS(unimproved, "unimproved.rds")
-
-# automotive shops, parking lots, and warehouse space are typically underassessed relative to other property
-filter(baltimore_cama_all,
-       str_detect(BL_DSCTYPE, "AUTO|WAREHOUSE")) -> likely_underassessed
-
-saveRDS(likely_underassessed, "likely_underassessed.rds")
-

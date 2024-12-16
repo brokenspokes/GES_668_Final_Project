@@ -47,7 +47,46 @@ This is not available through the Baltimore Open Data portal.
 
 ## Analysis Scripts
 
+The Analysis scripts are in the "R" folder and are numbered in the order described
+in this readme in addition to being named the same as their header. RDS objects or
+OGC geopackages are used as intermediate objects 
+
 ### Property Identification
+
+This first script brings together the city and state property information datasets
+into a more easily usable table. The city and state real property datasets both have
+over 100 columns, much of it unneeded for this analysis. First, we trim the Baltimore
+dataset and then join it to the Maryland state set with the BLOCKLOT identifier in
+order to get the account ID for each property. Then, we join the CAMA datasets to
+get the land use description that we will utilize for categorization.
+
+### Sale Identification
+
+This script focuses on the sales stored in the state real property dataset. We are
+first going to take those and pivot them to a long format in order to get tidy sales
+data. I was unsure how to approach the next two steps so I asked for chatGPT assistance.
+There is an elegant method for categorizing sales as vacant or non-vacant based on
+the date ranges provided in the VBN data with a join.
+
+Next, we assign the assessed Base and Current Cycle values to the three years they
+represent. Maryland's State Department of Assessments and Taxation works in a three-year
+cycle. For this, I also had ChatGPT help in writing a scripted that translated these
+ranges into long format.
+
+[Conversation with Assistance](https://chatgpt.com/share/675f4586-a0cc-8010-8570-52b9856d12c8)
+
+The last two chunks of this script represent subjective choices on my part that affect
+the analysis. First, I filter out sales where the price is represented as $0 or the
+assessment is represented as $0. Zero dollar sales usually represent a transfer of
+property and have no bearing on its value, while the assessments are likely in error
+as every property has at least some value. Next, I group and combine sales that are
+the same date, price, block, and type of sale since these are likely to be grouped
+purchases. This is a data quality issue because the state fails to separate the price
+paid for individual proeperties when many are involved in a transfer.
+
+### Sale Analysis
+
+The first two scripts do most of the heavy lifting aside from identification
 
 ## Acknowledgements and related projects
 

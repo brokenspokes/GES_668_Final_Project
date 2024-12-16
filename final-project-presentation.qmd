@@ -3,16 +3,26 @@ title: "GES668: Property Assessments in Baltimore"
 author: "Joshua Spokes"
 format: 
   revealjs:
+    scrollable: true
     slide-number: true
     multiplex: true
+    options:
+      autoScale: true
 date-modified: 2024-12-14
 ---
 
 
-## The Data
-
-
-
+```{r setup, include=FALSE}
+library(tidyverse)
+library(sf)
+library(readr)
+library(reactable)
+library(ggplot2)
+library(knitr)
+library(gt)
+library(rdeck)
+library(tidycensus)
+```
 
 ## Working with Reveal.js
 
@@ -21,8 +31,6 @@ This slide includes a code block and presentation notes.
 ```{r}
 #| label: example_code-block
 #| echo: true
-library(sf)
-library(ggplot2)
 
 nc <- st_read(system.file("shape/nc.shp", package="sf"))
 
@@ -45,10 +53,6 @@ This slide includes a hidden code block and a custom footer. See the [Quarto cod
 ```{r}
 #| label: example_hidden-code-block
 #| echo: false
-
-library(dplyr)
-library(gt)
-
 nc |> 
   st_drop_geometry() |> 
   select(AREA, PERIMETER, NAME, FIPS) |> 
@@ -77,6 +81,8 @@ Back when I was first learning about data analysis, I started a project looking 
 2. Match these patterns to recorded sales
 
 3. Aggregate sales data by block group
+
+![Vacants](vacants.jpeg)
 
 ::: {.notes}
 My initial goals for the project were to identify sales of property in various categories defined in the proposal, like vacant, unimproved, and auto-oriented. I then planned to compare the sale price to the assessed price for the year and aggregate the data into block groups in order to analyze the sales.
@@ -110,62 +116,266 @@ The data used for this project come from Maryland's planning cadastre service on
 
 ## Baltimore Real Property
 
-```{r real-prop}
+```{r real-prop, cache=TRUE}
 #| label: baltimore-real-prop
-#| include: false
-library(sf)
-library(tmap)
-st_read("Data/baltimore_real_prop_boundaries.gpkg") -> baltimore
+st_read("Data/baltimore_real_prop_boundaries.gpkg",
+        quiet = TRUE) -> baltimore
 
 baltimore |>
   st_make_valid() |>
   tm_shape() +
   tm_polygons()
 ```
+Baltimore's real property dataset provides additional attributes not provided at the state level like neighborhood and whether it's unimproved property
+
 
 :::{.notes}
-This dataset is available through the Baltimore Open Data portal, so it is easy to download 
+This dataset is available through the Baltimore Open Data portal, so it is easy to download or access with arcgislayers. The extract I am using will be available through this repository. The data is maintained by the city of Baltimore and is created as an extract of maryland's state-level data.
+:::
+
+## Baltimore Vacant Building Notices
+
+All vacant building notices issued in Baltimore back to the 1970s
+```{r vbns, cache = TRUE}
+
+read_csv("Data/VBNs_All_112624.csv") -> vbns
+
+head(vbns,
+     1000) |>
+  reactable(defaultPageSize = 10, 
+            style = list(fontSize = "12px", maxHeight = "300px"))
+
+```
+
+:::{.notes}
+This dataset has been made available via Zenodo: https://doi.org/10.5281/zenodo.14497481. This is created and maintained by the Baltimore Department of Housing and Community Development. It is an important marker because it represents a subset of property being tracked for the purposes of punishing those who do not maintain property.
+:::
+
+
+## Maryland Property Assessment
+
+This data shows the property attributes of every piece of real property in Maryland, which includes location, assessment values, and some building characteristics.
+```{r md-real-prop, cache=TRUE}
+read.csv("Data/MD_Real_Property_Assessments.csv") -> assessments
+
+head(assessments,
+     1000) |>
+  reactable(defaultPageSize = 10, 
+            style = list(fontSize = "12px", maxHeight = "300px"))
+
+```
+
+
+
+## Maryland CAMA Data
+
+Building Characteristics
+```{r md-cama, cache = TRUE}
+MD_CAMA_Building_Characteristics <- read_csv("Data/MD_CAMA_Building_Characteristics.csv")
+
+head(MD_CAMA_Building_Characteristics,
+     1000) |>
+  reactable(defaultPageSize = 10, 
+            style = list(fontSize = "12px", maxHeight = "200px"))
+
+```
+
+Core
+
+```{r building, CACHE = TRUE}
+MD_CAMA_Core <- read_csv("Data/MD_CAMA_Core.csv")
+
+head(MD_CAMA_Core,
+     1000) |>
+  reactable(defaultPageSize = 10, 
+            style = list(fontSize = "12px", maxHeight = "200px"))
+
+```
+
+:::{.notes}
+The CAMA, or Computer Assisted Mass Appraisal, data is used to store characteristics of a property for the purposes of generating assessment values at a mass scale. There are two sets used for this project, the Building Characteristics and Core, which provide information on what type of property is present, like residential or commercial. The data used for this project come from Maryland's planning cadastre service on IMAP, with additional supporting data coming from Baltimore's open data portal and a dataset of vacant building notices provided by the Baltimore Department of Housing and Community Development.
+
+:::
+
+## Baltimore Neighborhoods
+```{r neighborhoods}
+st_read("Data/Neighborhood_Statistical_Area_(NSA)_Boundaries/Neighborhood_Statistical_Area_(NSA)_Boundaries.shp",
+        quiet = TRUE) |>
+  st_set_geometry("polygon") |>
+  st_transform("WGS84") -> neighborhoods
+
+
+rdeck(
+  map_style = mapbox_dark(),
+  theme = "kepler",
+  initial_bounds = st_bbox(neighborhoods),
+  height = 600
+  ) |>
+  add_polygon_layer(
+    name = "Baltimore Neighborhoods",
+    data = neighborhoods,
+    opacity = 0.6,
+    get_fill_color = scale_color_linear(
+      Population,
+      col_label = "Population"
+    ),
+    tooltip = c(Name, Population),
+    pickable = TRUE
+  )
+```
+:::{.notes}
+The Baltimore neighborhoods dataset was created by Baltimore's Department of Planning based on 2020 census data. It provides demographic information for all of the neighborhoods in the city, which means it a convenient place to aggregate
 
 :::
 
 
-More than one slide per data source is likely required for this section and basic information on each major data source used in your project. Make sure to answer:
+## Analysis Approach
 
--   What data sources did you use?
+-   Combination of exploratory analysis and visualization
 
--   How, why, and where were they created?
+-   Relying heavily on dplyr and sf libraries for analysis
 
-The data used for this project come from Maryland's planning cadastre service on IMAP, with additional supporting data coming from Baltimore's open data portal and a dataset of vacant building notices provided by the Baltimore Department of Housing and Community Development.
+-   rdeck and tmap used for visualization
 
+## Identifying sales of vacant property
 
-## Approach and methods for working with data
+```{r approach, eval = FALSE, echo = TRUE}
+sales_valid_date |>
+  left_join(dates, by = join_by(property == BLOCKLOT)) |>
+  mutate(
+    vacant_at_sale = (date >= DateNotice) & ((is.na(date_terminate) | date <= date_terminate))
+  ) |>
+  group_by(BLOCKLOT, sale) |>
+  summarise(across(everything(), first),
+            vacant_at_sale = any(vacant_at_sale, na.rm = TRUE)
+  ) |>
+  ungroup() -> vacant_sale
+```
 
+I was scratching my head trying to figure this out and asked ChatGPT [@ChatGPT] for help on how to approach this, which resulted in this elegant method for determining where there was a sale of vacant property.
+
+::: {.notes}
 My project involved a significant amount of exploratory analysis, looking to determine the best ways to approach the intended goal. As I delved deeper into the project, I found that the quantity of the data or the quality of the data and transformations I was completing makes the comparisons very difficult. The results were not what I was expecting
+:::
 
-Briefly recap related information from your initial project proposal describing your approach. Make sure to answer:
+## Categorizing other sales
 
--   Did your approach involve mapping, exploratory analysis, documentation, visualization, or a combination of multiple approaches?
+```{r categorization, echo = TRUE, eval = FALSE}
+left_join(sales, property_land_use, by = join_by(property == BLOCKLOT)) |>
+  group_by(property, transfer_no) |>
+  summarise(date = first(date),
+            price = first(price),
+            block = first(block.x),
+            property = first(property),
+            acct_id_full = first(acct_id_full.x),
+            vacant_at_sale = first(vacant_at_sale),
+            Land_Value = first(Land_Value),
+            Improvement_Value = first(Improvement_Value),
+            Total_Assessment = first(Total_Assessment),
+            NEIGHBOR = first(NEIGHBOR),
+            BL_DSCTYPE = first(BL_DSCTYPE),
+            BL_DSCSTYL = first(BL_DSCSTYL),
+            CM_DSCIUSE = first(CM_DSCIUSE),
+            NO_IMPRV = first(NO_IMPRV),
+            .groups = "keep") |>
+  mutate(identifier = case_when(
+    (NO_IMPRV == "Y" & is.na(BL_DSCTYPE))    ~ "unimproved",
+    vacant_at_sale                           ~ "vacant",
+    str_detect(BL_DSCTYPE, "AUTO|WAREHOUSE") ~ "unperforming",
+    .default = "regular"),
+    price_ratio = Total_Assessment / price) |>
+  ungroup() -> all_sales
+```
 
--   Why did you select this approach and did you change apporach while completing your final project?
+:::{.notes}
+This chunk shows the characterization of different types of sales based on whether the property was vacant at the time of sale, unimproved, or likely underperforming
+:::
 
--   What packages, templates, or other resources did you use in creating your final project?
+## Aggregation by neighborhood
 
-
+```{r neighborhood-aggregation, echo = TRUE, eval = FALSE}
+all_sales |>
+  group_by(NEIGHBOR, identifier) |>
+  summarise(med_price_ratio = median(price_ratio),
+            mean_price_ratio = mean(price_ratio),
+            med_price = median(price),
+            mean_price = mean(price),
+            n = n(),
+            .groups = "keep") |>
+  pivot_wider(id_cols = "NEIGHBOR",
+              names_from = "identifier",
+              names_glue = "{identifier}_{.value}",
+              values_from = c("med_price_ratio",
+                              "mean_price_ratio",
+                              "med_price",
+                              "mean_price",
+                              "n")) %>%
+  left_join(neighborhoods, ., by = join_by(Name == NEIGHBOR)) |>
+  mutate(pct_blk = Blk_AfAm / Population,
+         pct_wht = White / Population) |>
+  select(Name,
+         Population,
+         pct_blk,
+         pct_wht,
+         starts_with(c("vacant",
+                       "unimproved",
+                       "unperforming",
+                       "regular"))) -> neighborhood_stats
+```
 
 ## Challenges in working with data
 
-What challenges did you encounter in making use of these resources and this data?
+-   Baltimore City and Maryland State data use separate keys (BLOCKLOT and Account ID)
 
-There are different primary keys to use between Baltimore city data and maryland state data
+-   I frequently found myself backtracking to add attributes to various intermediate datasets
 
-I frequently found myself backtracking to add attributes to various intermediate datasets
-
+-   Getting to the end and realizing that data isn't clean enough for conclusions
 
 
 ## Successes in working with data
 
 I think my analysis does a good job in taking a very big dataset and distilling it to a more useable format. I aimed to make the data more tidy so that it would be easier to create comparisons
 
+```{r dot-density-deck, cache = TRUE}
+st_read("neighborhood_stats.gpkg",
+        quiet = TRUE) |>
+  select(Name,
+         ends_with("_n")) |>
+  pivot_longer(cols = ends_with("_n"),
+               names_to = "Sale_Type",
+               values_to = "N_Sales") |>
+  mutate(Sale_Type = gsub("_n", "", Sale_Type)) -> pivot
+
+sale_dot_density <- as_dot_density(pivot,
+                                   value = "N_Sales",
+                                   values_per_dot = 10,
+                                   group = "Sale_Type")
+
+rdeck_dark <- rdeck(map_style = mapbox_dark(),
+                    theme = "kepler",
+                    initial_bounds = st_bbox(pivot),
+                    height = 600
+)
+
+sale_dot_density |>
+  st_transform(4326) |>
+  st_set_geometry("position") -> sale_dot_density
+
+rdeck_dark |>
+  add_scatterplot_layer(
+    name = "Sales by type of property (10 per dot)",
+    data = sale_dot_density,
+    radius_min_pixels = 1,
+    radius_max_pixels = 5,
+    radius_scale = 5,
+    opacity = 0.6,
+    get_fill_color = scale_color_category(
+      Sale_Type,
+      palette = scales::brewer_pal("qual"),
+      col_label = "Sale Type"
+    )
+  )
+```
 What do you think your project does well?
 
 Your areas of success likely depend on your approach:

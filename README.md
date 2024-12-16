@@ -86,7 +86,17 @@ paid for individual proeperties when many are involved in a transfer.
 
 ### Sale Analysis
 
-The first two scripts do most of the heavy lifting aside from identification
+The first two scripts do most of the heavy lifting aside from identification of sales
+and the calculation of the price ratio. This script brings the intermediate tables
+together to label the sale with a land use type. We classify properties with the NO_IMPRV
+marker from the Baltimore Real Property data and with no land use classification from
+the state CAMA data as unimproved sales. Any sales labeled vacant by the previous script
+are identified as vacant. Last, any properties labeled AUTO or WAREHOUSE are likely
+underperforming properties. Anything else is classified as a regular sale.
+
+The price ratio is determined as the Assessed Value at the time of sale divided by
+the price of the sale. So if it's over 1, the property is overassessed and under 1
+is underassessed.
 
 ## Acknowledgements and related projects
 

@@ -152,6 +152,6 @@ sale_with_value |>
             .groups = "drop"
             ) -> unique_sales
 
-saveRDS(unique_sales, "sales_of_interest.rds")
+saveRDS(unique_sales, "Data/sales_of_interest.rds")
 
 ## we are only interested in sales where we have a sale price and an assessment value

@@ -68,7 +68,7 @@ This is an example of a custom footer.
 ## Overview
 
 Are certain types of properties getting a free ride on their taxes?
-![Project Origin](2_block_city.png)
+![Project Origin](Images/2_block_city.png)
 
 ::: {.notes}
 Back when I was first learning about data analysis, I started a project looking at assessment values in and around the Patterson Bowling Alley. I compared the property taxes being paid by the blocks in the image and found that the commercial property in the middle was paying significantly less for the same amount of land.
@@ -82,7 +82,7 @@ Back when I was first learning about data analysis, I started a project looking 
 
 3. Aggregate sales data by block group
 
-![Vacants](vacants.jpeg)
+![Vacants](Images/vacants.jpeg)
 
 ::: {.notes}
 My initial goals for the project were to identify sales of property in various categories defined in the proposal, like vacant, unimproved, and auto-oriented. I then planned to compare the sale price to the assessed price for the year and aggregate the data into block groups in order to analyze the sales.

@@ -1,9 +1,9 @@
 library(sf)
 library(rdeck)
-library(dplyr)
+library(tidyverse)
 library(tidycensus)
 
-st_read("neighborhood_stats.gpkg") |>
+st_read("Data/neighborhood_stats.gpkg") |>
   select(Name,
          ends_with("_n")) |>
   pivot_longer(cols = ends_with("_n"),

@@ -63,5 +63,5 @@ left_join(baltimore_cama_bldg,
           cama_core_simple,
           by = join_by(acct_id_full == ACCTID)) -> baltimore_cama_all
 
-saveRDS(baltimore_cama_all, "baltimore_land_use.rds")
+saveRDS(baltimore_cama_all, "Data/baltimore_land_use.rds")
 

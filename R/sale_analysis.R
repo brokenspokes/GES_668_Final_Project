@@ -69,5 +69,5 @@ all_sales |>
                        "unperforming",
                        "regular"))) -> neighborhood_stats
 
-saveRDS(neighborhood_stats, "neighborhood_stats")
+saveRDS(neighborhood_stats, "neighborhood_stats.rds")
 st_write(neighborhood_stats, "neighborhood_stats.gpkg", append = FALSE)

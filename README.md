@@ -7,32 +7,33 @@ and property.
 
 ## Data Sources
 
-All of the data except for one table is publicly available with both an API endpoint
+Most of the data used in this project is too large to be uploaded to github.All of
+the data except for one table is publicly available with both an API endpoint
 and the ability to download through an open data portal. I will provide both for
 all of those where it is available in addition to a public repository link where
 the extracts used in these analyses are available.
 
 ### Baltimore Real Property Information (CC 3.0)
 
-API Endpoint: https://geodata.baltimorecity.gov/egis/rest/services/CityView/Realproperty_OB/FeatureServer/0
+[API Endpoint](https://geodata.baltimorecity.gov/egis/rest/services/CityView/Realproperty_OB/FeatureServer/0)
 
-Open Data Portal: https://data.baltimorecity.gov/datasets/baltimore::real-property-information-2/about
+[Open Data Portal](https://data.baltimorecity.gov/datasets/baltimore::real-property-information-2/about)
 
-My extract: https://doi.org/10.5281/zenodo.14498393
+[My extract](https://doi.org/10.5281/zenodo.14498393)
 
 ### Baltimore Vacant Building Notices (CC 3.0)
 
 This is not available through the Baltimore Open Data portal.
 
-Available extract: https://doi.org/10.5281/zenodo.14497481
+[Available extract](https://doi.org/10.5281/zenodo.14497481)
 
 ### Maryland Real Property Information (Public Domain)
 
-API Endpoint: https://geodata.md.gov/imap/rest/services/PlanningCadastre/MD_ParcelBoundaries/MapServer/0
+[API Endpoint](https://geodata.md.gov/imap/rest/services/PlanningCadastre/MD_ParcelBoundaries/MapServer/0)
 
-Open Data Portal: https://opendata.maryland.gov/Business-and-Economy/Maryland-Real-Property-Assessments_Hidden-Property/ed4q-f8tm/about_data
+[Open Data Portal](https://opendata.maryland.gov/Business-and-Economy/Maryland-Real-Property-Assessments_Hidden-Property/ed4q-f8tm/about_data)
 
-My extract: https://doi.org/10.5281/zenodo.14498401
+[My extract](https://doi.org/10.5281/zenodo.14498401)
 
 ## Analysis Scripts
 

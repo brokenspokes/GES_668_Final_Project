@@ -137,12 +137,15 @@ is that there are still a lot of vacant property to be dealt with.
 
 #### All Property Sales
 
-![All Sales](Images/rdeck_dotplot.png) \#### Vacant, Unimproved and
-Underperforming only
+![All Sales](Images/rdeck_dotplot.png)
+
+#### Vacant, Unimproved and Underperforming only
 
 ![Vacants Only](Images/vacants_only_dotplot.png)
 
-## Acknowledgements and related projects
+### Mean and Median Sale Ratio
+
+These visualizations show \## Acknowledgements and related projects
 
 This project was inspired by similar work being taken on elsewhere that
 investigates the myriad of ways local governments, inadvertently or not,

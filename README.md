@@ -143,9 +143,22 @@ is that there are still a lot of vacant property to be dealt with.
 
 ![Vacants Only](Images/vacants_only_dotplot.png)
 
-### Mean and Median Sale Ratio
+#### Median Sale Ratio
 
-These visualizations show \## Acknowledgements and related projects
+This map shows no systemic issues with assessments when we aggregate
+property sales at the neighborhood level
+
+![Price Ratio](Images/median_price_ratio.png)
+
+#### Difference between median vacant and regular sale price ratios
+
+This map shows that most vacant properties were actually overassessed
+compared with regular properties in neighborhoods with a high enough
+sample size.
+
+![Vacant Diff](Images/vacant_to_regular_diff.png)
+
+## Acknowledgements and related projects
 
 This project was inspired by similar work being taken on elsewhere that
 investigates the myriad of ways local governments, inadvertently or not,

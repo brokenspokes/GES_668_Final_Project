@@ -39,4 +39,4 @@ rdeck_dark |>
       palette = scales::brewer_pal("qual"),
       col_label = "Sale Type"
     )
-  )
+  ) -> mapdeck_output

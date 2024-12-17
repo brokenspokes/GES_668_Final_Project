@@ -130,39 +130,17 @@ the coming years.
 
 ### Sale density dotplot
 
-I like using this visualization first because
+I like using this visualization first because it shows that Baltimore
+has robust property sales despite the misconceptions about the state of
+the city. It also shows the scale of the issue being dealt with, which
+is that there are still a lot of vacant property to be dealt with.
 
-``` r
-source("R/04_sale_dotplot.R")
-```
+#### All Property Sales
 
-    Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+![All Sales](Images/rdeck_dotplot.png) \#### Vacant, Unimproved and
+Underperforming only
 
-    ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-    ✔ dplyr     1.1.4     ✔ readr     2.1.5
-    ✔ forcats   1.0.0     ✔ stringr   1.5.1
-    ✔ ggplot2   3.5.1     ✔ tibble    3.2.1
-    ✔ lubridate 1.9.3     ✔ tidyr     1.3.1
-    ✔ purrr     1.0.2     
-    ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-    ✖ dplyr::filter() masks stats::filter()
-    ✖ dplyr::lag()    masks stats::lag()
-    ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
-
-    Reading layer `neighborhood_stats' from data source 
-      `/Users/jspokes/Documents/R_Projects/Final_Project_Presentation/Data/neighborhood_stats.gpkg' 
-      using driver `GPKG'
-    Simple feature collection with 279 features and 27 fields
-    Geometry type: MULTIPOLYGON
-    Dimension:     XY
-    Bounding box:  xmin: 1393931 ymin: 557733.6 xmax: 1445504 ymax: 621406.8
-    Projected CRS: NAD83 / Maryland (ftUS)
-
-``` r
-mapdeck_output
-```
-
-![](README_files/figure-commonmark/dotplot-1.png)
+![Vacants Only](Images/vacants_only_dotplot.png)
 
 ## Acknowledgements and related projects
 

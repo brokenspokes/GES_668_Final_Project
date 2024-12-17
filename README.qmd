@@ -111,13 +111,17 @@ I hope that I will be able to continue this work in the coming years.
 
 ### Sale density dotplot
 
-I like using this visualization first because 
+I like using this visualization first because it shows that Baltimore has robust
+property sales despite the misconceptions about the state of the city. It also shows
+the scale of the issue being dealt with, which is that there are still a lot of vacant
+property to be dealt with.
 
-```{r dotplot}
-source("R/04_sale_dotplot.R")
+#### All Property Sales
 
-mapdeck_output
-```
+![All Sales](Images/rdeck_dotplot.png)
+#### Vacant, Unimproved and Underperforming only
+
+![Vacants Only](Images/vacants_only_dotplot.png)
 
 ## Acknowledgements and related projects
 
